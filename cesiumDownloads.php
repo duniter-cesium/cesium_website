@@ -7,7 +7,7 @@ $cesiumDownloads =
 		'title' => 'Android',
 		'url' => 'https://play.google.com/store/apps/details?id=fr.duniter.cesium',
 		'img' => 'android.svg',
-		'desc' => _('Disponible directement sur le Play Store'),
+		'desc' => _('Disponible directement sur le Play Store') . '. ' .  _('Si votre version d\'Android est récente, préférez le fichier .apk téléchargeable via le lien un peu plus bas.'),
 		'extra' => sprintf(_('(ou <a href="%s">télécharger le fichier .apk</a>)'), 'https://github.com/duniter/cesium/releases/download/v'. $cesiumVersions['android'] .'/cesium-v'. $cesiumVersions['android'] .'-android.apk')
 	],
 	'iphone' => [
