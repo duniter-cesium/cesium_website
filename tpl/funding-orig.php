@@ -32,6 +32,7 @@ include('head.php');
 	
 	<?php
 	
+	/*
 	$today = new DateTime();
 	
 	$lastMonthSameDay = (clone $today)->sub(new DateInterval('P1M'));
@@ -85,6 +86,7 @@ include('head.php');
 
 		echo '</ul>';
 	}
+	*/
 	?>
 
 	
@@ -114,10 +116,11 @@ include('head.php');
 	</div>
 	
 	
+	<!--
 	<h2>Progression du crowdfunding du mois en cours</h2>
 	
 	<figure id="chart"></figure>
-	
+	-->
 	
 	
 	
@@ -247,6 +250,7 @@ include('head.php');
 
 <?php 
 
+/*
 $currentCF = new Crowdfunding(FUNDING_PUBKEY, 'relative');
 $currentCF->setTarget(FUNDING_TARGET);
 $chart = new Chart($currentCF);
@@ -271,6 +275,7 @@ $chart->addGraph($amountCumulativeGraph);
 
 
 echo $chart->getScripts(LANG, '#chart', $rootURL . '/vendor/crowdfunding2/');
+*/
 
 ?>
 
