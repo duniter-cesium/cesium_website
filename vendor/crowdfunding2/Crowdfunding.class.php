@@ -74,6 +74,15 @@ class Crowdfunding {
 	private $nodes = [
 
 		// Fast ones
+		'duniter971.dns1.us',
+		'duniter.g1.pfouque.xyz',
+		'duniter.pini.fr',
+		'g1.asycn.io',
+		'g1.brussels.ovh',
+		'g1.cgeek.fr',
+		'g1.computhings.be'
+
+		/*
 		'duniter.g1.1000i100.fr',
 		'duniter-g1.p2p.legal',
 		'duniter.normandie-libre.fr',
@@ -82,6 +91,7 @@ class Crowdfunding {
 		'duniter.vincentux.fr',
 		'g1.le-sou.org',
 		'g1.donnadieu.fr',
+		*/
 
 		/*
 		// Node that timeout
@@ -1067,67 +1077,81 @@ class Crowdfunding {
 		return $this->monthlyAmountCollectedMean;
 	}
 
+	private function cacheIt ($json, $cacheFileFullPath) {
+
+		if (!$this->isActivatedCache) {
+
+			return false;
+		}
+
+		// Cache tx
+
+		$cacheDir = substr($cacheFileFullPath, 0, strrpos($cacheFileFullPath, '/'));
+
+		if (!file_exists($cacheDir)) {
+
+			mkdir($cacheDir, 0777, true);
+
+		}
+
+		file_put_contents($cacheFileFullPath, $json);
+	}
+
+	private function getFromCache ($cacheFullPath) {
+
+		$json = NULL;
+
+		if (!$this->isActivatedCache) {
+
+			return $json;
+		}
+
+		if (file_exists($cacheFullPath) and ((time() - filemtime($cacheFullPath)) < $this->cacheLongevity)) {
+
+			$json = file_get_contents($cacheFullPath);
+		}
+
+		return $json;
+	}
+
 	private function getTransactions ($pubkey, $startDate, $endDate = NULL) {
 
 		if ($startDate > $this->now) {
 
 			return array();
 
+		}
+
+		if (!isset($endDate)) {
+
+			$endDate = $this->today;
+		}
+
+		$txFullPath =
+			$this->isOver() ?
+				$this->cacheDir . 'tx/' . $pubkey . '_'  . $startDate->format('Y-m-d') . '_' . $endDate->format('Y-m-d') . '.json'
+			:
+				$this->cacheDir . 'tx/' . $pubkey . '_'  . $startDate->format('Y-m-d') . '.json'
+		;
+
+		$json = $this->getFromCache($txFullPath);
+
+		if (empty($json)) {
+
+			$jsonUri = '/tx/history/' . $pubkey . "/times/" . $startDate->getTimestamp() . "/" . $endDate->getTimestamp();
+			$json = $this->fetchJson($jsonUri);
+		}
+
+		$transactions = json_decode($json);
+
+		if (empty($transactions)) {
+
+			throw new Exception(_("Nous n'avons pas pu récupérer la liste des transactions."));
+			return array();
+
 		} else {
 
-			if (!isset($endDate)) {
-
-				$endDate = $this->today;
-			}
-
-			$json = NULL;
-			$jsonUri = '/tx/history/' . $pubkey . "/times/" . $startDate->getTimestamp() . "/" . $endDate->getTimestamp();
-			$txCacheDir = $this->cacheDir . 'tx/';
-
-			if ($this->isOver()) {
-
-				$txFullPath = $txCacheDir . $pubkey . '_'  . $startDate->format('Y-m-d') . '_' . $endDate->format('Y-m-d') . '.json';
-
-			} else {
-
-				$txFullPath = $txCacheDir . $pubkey . '_'  . $startDate->format('Y-m-d') . '.json';
-
-			}
-
-			if ($this->isActivatedCache) {
-
-				if (file_exists($txFullPath) and ((time() - filemtime($txFullPath)) < $this->cacheLongevity)) {
-
-					$json = file_get_contents($txFullPath);
-				}
-
-
-				if (empty($json)) {
-
-					$json = $this->fetchJson($jsonUri);
-
-					// Cache tx
-
-					if ($this->isActivatedCache) {
-
-						if (!file_exists($txCacheDir)) {
-
-							mkdir($txCacheDir, 0777, true);
-
-						}
-
-						file_put_contents($txFullPath, $json);
-					}
-
-				}
-
-			} else {
-
-				$json = $this->fetchJson($jsonUri);
-			}
-
-			$transactions = json_decode($json);
-
+			$this->cacheIt($json, $txFullPath);
 			return $transactions->history->received;
 		}
 	}
@@ -1142,7 +1166,14 @@ class Crowdfunding {
 
 		if (empty($this->donationsList)) {
 
-			$this->fetchDonationsList();
+			try {
+
+				$this->fetchDonationsList();
+
+			} catch (Exception $e) {
+
+				throw $e;
+			}
 
 		}
 
@@ -1152,9 +1183,16 @@ class Crowdfunding {
 
 	public function getDonors () {
 
-		if (empty($this->donorsList)) {
+		try {
 
-			$this->fetchDonationsList();
+			if (empty($this->donorsList)) {
+
+				$this->fetchDonationsList();
+			}
+
+		} catch (Exception $e) {
+
+			throw $e;
 		}
 
 		return $this->donorsList;
@@ -1289,48 +1327,59 @@ class Crowdfunding {
 		$this->amountCollected = 0;
 		$this->donorsNb = 0;
 
-		$tx = $this->getTransactions($this->pubkey,
-		                             $this->startDate,
-		                             $this->endDate
-		                            );
+		try {
+
+			$tx =
+				$this->getTransactions(
+					$this->pubkey,
+					$this->startDate,
+					$this->endDate
+				);
+
+		} catch (Exception $e) {
+
+			throw $e;
+		}
 
 		foreach ($tx as $t) {
 
-			// Filter only incoming transactions
-			if ($t->issuers[0] != $this->pubkey) {
+			// Do not take outgoing transactions into account
+			if ($t->issuers[0] == $this->pubkey) {
 
-				$donorPubkey = $t->issuers[0];
+				continue;
+			}
 
-				foreach ($t->outputs as $o) {
+			$donorPubkey = $t->issuers[0];
 
-					if (strstr($o, $this->pubkey)) {
+			foreach ($t->outputs as $o) {
 
-						$o = explode(':', $o);
+				if (strstr($o, $this->pubkey)) {
 
-						$transactionAmount = $o[0] / 100;
+					$o = explode(':', $o);
 
-						$this->donationsList[] = new Donation(
+					$transactionAmount = $o[0] / 100;
 
-							$transactionAmount,
-							$donorPubkey,
-							intval($t->time),
-							$t->comment
-						);
+					$this->donationsList[] = new Donation(
 
-						$this->amountCollected += $transactionAmount;
+						$transactionAmount,
+						$donorPubkey,
+						intval($t->time),
+						$t->comment
+					);
 
-						if (!in_array($donorPubkey, $this->donorsList)) {
+					$this->amountCollected += $transactionAmount;
 
-							++$this->donorsNb;
+					if (!in_array($donorPubkey, $this->donorsList)) {
 
-							$this->donorsList[] = $donorPubkey;
+						++$this->donorsNb;
 
-							$this->totalDonationPerDonor[$donorPubkey] = $transactionAmount;
+						$this->donorsList[] = $donorPubkey;
 
-						} else {
+						$this->totalDonationPerDonor[$donorPubkey] = $transactionAmount;
 
-							$this->totalDonationPerDonor[$donorPubkey] += $transactionAmount;
-						}
+					} else {
+
+						$this->totalDonationPerDonor[$donorPubkey] += $transactionAmount;
 					}
 				}
 			}
@@ -1361,11 +1410,11 @@ class Crowdfunding {
 		$node = htmlspecialchars($node);
 
 		$this->nodes = array_unique(
-		                            array_merge(
-		                                        (array)$node,
-		                                        $this->nodes
-		                                       )
-		                           );
+			array_merge(
+				(array)$node,
+				$this->nodes
+			)
+		);
 	}
 
 
@@ -1477,10 +1526,11 @@ class Crowdfunding {
 
 		do {
 
-
-			$json = @file_get_contents("https://" . current($nodes) . $uri,
-				                   false,
-				                   $streamContext);
+			$json = @file_get_contents(
+				"https://" . current($nodes) . $uri,
+				false,
+				$streamContext
+			);
 
 			if (empty($json)) {
 

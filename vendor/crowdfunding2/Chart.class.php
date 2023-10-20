@@ -21,17 +21,16 @@ class Chart {
 	
 	private function addLastPointOfCumulativeGraph ($lastAmount) {
 	
-		$lastDay = NULL;
-			
-		if ($this->crowdfunding->isOver()) {
-		
-			$lastDay = $this->crowdfunding->getEndDate();
-		
-		} elseif ($this->crowdfunding->hasStartedYet()) {
-			
-			$lastDay = $this->crowdfunding->today;
-		}
-		
+		$lastDay =
+			$this->crowdfunding->isOver() ?
+				$this->crowdfunding->getEndDate()
+			:(
+				$this->crowdfunding->hasStartedYet() ?
+					$this->crowdfunding->today
+				:
+					NULL
+			)
+		;
 		
 		if (isset($lastDay)) {
 			
@@ -54,50 +53,31 @@ class Chart {
 	
 	private function addSecondPointOfTarget ($target) {
 		
-		$d = NULL;
+		$date =
+			$this->crowdfunding->isOver() ?
+				$this->crowdfunding->getEndDate()
+			:(
+				!$this->crowdfunding->isEvergreen() ?
+					$this->crowdfunding->getEndDate()
+				:(
+					$this->crowdfunding->isEvergreen() == 'monthly' ?
+						// last point will be the last day of the month the campaign starts
+						new DateTime($this->crowdfunding->getStartDate()->format("Y-m-t"))
+					:(
+						$this->crowdfunding->hasStartedYet() ?
+							$this->crowdfunding->now
+						:
+							// date of the last day of the month
+							 new DateTime($this->getStartDate()->format("Y-m-t"))
+					)
+				)
+			)
+		;
 		
-		if ($this->crowdfunding->isOver()) {
-		
-			$d = $this->crowdfunding->getEndDate();
-		
-		} else {
-		
-			if (!$this->crowdfunding->isEvergreen()) {
-				
-				$d = $this->crowdfunding->getEndDate();
-			
-			} else {
-				
-				if ($this->crowdfunding->isEvergreen() == 'monthly') {
-				
-					// last point will be the last day of the month the campaign starts
-					$dateOfLastDayOfTheMonth = new DateTime($this->crowdfunding->getStartDate()->format("Y-m-t"));
-					
-					$d = $dateOfLastDayOfTheMonth;
-					
-				} else { //if ($this->crowdfunding->isEvergreen() == 'forever') {
-					
-					if ($this->crowdfunding->hasStartedYet()) {
-						
-						$d = $this->crowdfunding->now;
-						
-					} else {
-						
-						
-						$dateOfLastDayOfTheMonth = new DateTime($this->getStartDate()->format("Y-m-t"));
-						
-						$d = $dateOfLastDayOfTheMonth;
-						
-					}
-				}
-				
-			}
-		}
-		
-		$d->add(new DateInterval('P1D'));
+		$date->add(new DateInterval('P1D'));
 		
 		$this->points['targetLine'][] = [
-			't' => $d->getTimestamp() * 1000,
+			't' => $date->getTimestamp() * 1000,
 			'y' => $target
 		];
 	}
@@ -149,8 +129,15 @@ class Chart {
 			'y' => 0
 	  	 ];
 		*/
-	
-		$tx = $this->crowdfunding->getDonationsList();
+
+		try {
+
+			$tx = $this->crowdfunding->getDonationsList();
+
+		} catch (Exception $e) {
+
+			$tx = NULL;
+		}
 		
 		if (empty($tx)) {
 		
@@ -160,7 +147,7 @@ class Chart {
 				't' => $mt_0,
 				'y' => 0
 		  	 ];
-		  	 
+
 	  	 } else {
 			
 			$currentDay = new DateTime();
@@ -214,7 +201,6 @@ class Chart {
 		if (empty($this->points)) {
 
 			$this->setPoints();
-
 		}
 		
 		return json_encode($this->points['amountCollectedByDay']);
@@ -227,10 +213,14 @@ class Chart {
 		if (empty($this->points)) {
 
 			$this->setPoints();
-
 		}
 		
-		$points = isset($this->points['amountCollectedByDayCumulative']) ? $this->points['amountCollectedByDayCumulative'] : [];
+		$points =
+			isset($this->points['amountCollectedByDayCumulative']) ?
+				$this->points['amountCollectedByDayCumulative']
+			:
+				[]
+			;
 		
 		return json_encode($points);
 	}
@@ -241,7 +231,6 @@ class Chart {
 		if (empty($this->points)) {
 
 			$this->setPoints();
-
 		}
 		
 		return json_encode($this->points['targetLine']);
