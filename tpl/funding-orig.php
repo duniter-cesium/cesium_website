@@ -83,7 +83,7 @@ include('head.php');
 			</p>
 
 			<p>
-			'. _('On en pioche quelques uns au hasard :') .'
+			'. _('On en pioche quelques unes au hasard :') .'
 			</p>
 			';
 
