@@ -23,6 +23,11 @@ class Donor {
 		$this->pubkey = $pubkey;
 	}
 	
+	public function getPubkey () {
+
+		return $this->pubkey;
+	}
+
 	public function setName ($name) {
 		
 		$this->name = $name;

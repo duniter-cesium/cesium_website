@@ -73,7 +73,7 @@ class Crowdfunding {
 
 	private $nodes = [
 
-		// Fast ones
+		// https://ginspecte.mithril.re/service_types/1
 		'duniter971.dns1.us',
 		'duniter.g1.pfouque.xyz',
 		'duniter.pini.fr',
@@ -81,38 +81,17 @@ class Crowdfunding {
 		'g1.brussels.ovh',
 		'g1.cgeek.fr',
 		'g1.computhings.be'
-
-		/*
-		'duniter.g1.1000i100.fr',
-		'duniter-g1.p2p.legal',
-		'duniter.normandie-libre.fr',
-		'g1.mithril.re',
-		'g1.presles.fr',
-		'duniter.vincentux.fr',
-		'g1.le-sou.org',
-		'g1.donnadieu.fr',
-		*/
-
-		/*
-		// Node that timeout
-		'g1.duniter.org',
-		'g1.librelois.fr',
-		'g1.cgeek.fr',
-		'remuniter.cgeek.fr',
-		'g1.monnaielibreoccitanie.org',
-
-		// Nodes with other issues
-		'g1.duniter.inso.ovh',
-		*/
 	];
 
 	private $cesiumPlusNodes = [
 
+		// https://ginspecte.mithril.re/service_types/2
+		'g1.data.brussels.ovh',
+		'g1.data.cuates.net',
 		'g1.data.e-is.pro',
-		'g1.data.presles.fr',
-		'g1.data.adn.life',
-		'g1.data.duniter.fr',
-		'g1.data.le-sou.org'
+		'g1.data.le-sou.org',
+		'g1.data.mithril.re',
+		'g1.data.pini.fr'
 	];
 
 	private $preferredNode = NULL;
@@ -197,6 +176,7 @@ class Crowdfunding {
 	private $donorsList = NULL;
 
 	private $donorsProfiles = NULL;
+	private $donorsCesiumPlusProfiles = NULL;
 
 
 	private $meanDonation = NULL;
@@ -1213,6 +1193,16 @@ class Crowdfunding {
 
 			return new Donor($pubkey);
 		}
+	}
+
+	public function getDonorsCesiumPlusProfiles () {
+
+		if ($this->donorsCesiumPlusProfiles === NULL) {
+
+			$this->fetchCesiumPlusProfiles();
+		}
+
+		return $this->donorsCesiumPlusProfiles;
 	}
 
 	public function fetchCesiumPlusProfiles () {

@@ -79,32 +79,40 @@ include('head.php');
 
 			echo '
 			<p>
-				'. _('Les développeurs remercient chaleureusement toutes les personnes qui, le mois dernier, ont financé en Ğ1 le projet Duniter&nbsp;:') .'
+				'. _('Les développeurs remercient chaleureusement toutes les personnes qui, le mois dernier, ont financé en Ğ1 le projet Duniter.') .'
+			</p>
+
+			<p>
+			'. _('Voici 12 d\'entre eux :') .'
 			</p>
 			';
 
 			echo '<ul class="donorsList">';
 
-			foreach ($donors as $donorPk) {
+			$donorsProfiles = $lastMonthCF->getDonorsCesiumPlusProfiles();
 
-				$donorProfile = $lastMonthCF->getDonorCesiumPlusProfile($donorPk);
+			$donorsWithAvatar = array_filter($donorsProfiles, function ($v, $k) {
 
-				if (!$donorProfile->hasAvatar()) {
+				return $v->hasAvatar();
 
-					continue;
-				}
+			}, ARRAY_FILTER_USE_BOTH);
+
+			shuffle($donorsWithAvatar);
+			$last12donorsWithAvatar = array_slice($donorsWithAvatar, 0, 12);
+
+			foreach ($last12donorsWithAvatar as $donor) {
 
 				echo '
 
 				<li>';
 					echo '
-					<a href="https://demo.cesium.app/#/app/wot/'. $donorPk .'/">';
+					<a href="https://demo.cesium.app/#/app/wot/'. $donor->getPubkey() .'/">';
 
 
-						echo '<img src="'. CESIUM_PLUS_NODE . '/user/profile/'. $donorPk .'/_image/avatar.png" />';
+						echo '<img src="'. CESIUM_PLUS_NODE . '/user/profile/'. $donor->getPubkey() .'/_image/avatar.png" />';
 
 						/*
-						$avatar = $donorProfile->getAvatar();
+						$avatar = $donor->getAvatar();
 
 						if (!empty($avatar)) {
 
@@ -120,7 +128,7 @@ include('head.php');
 						echo '
 						<span class="name">
 							<span>
-								'. $donorProfile->getName() .'
+								'. $donor->getName() .'
 							</span>
 						</span>
 					</a>
