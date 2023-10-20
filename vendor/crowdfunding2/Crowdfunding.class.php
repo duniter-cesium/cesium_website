@@ -911,8 +911,14 @@ class Crowdfunding {
 
 		if (!isset($this->amountCollected)) {
 
-			$this->fetchDonationsList();
+			try {
 
+				$this->fetchDonationsList();
+
+			} catch (Exception $e) {
+
+				throw $e;
+			}
 		}
 
 		return $this->convertIntoChosenUnit($this->amountCollected);
@@ -922,7 +928,14 @@ class Crowdfunding {
 
 		if (!isset($this->donorsNb)) {
 
-			$this->fetchDonationsList();
+			try {
+
+				$this->fetchDonationsList();
+
+			} catch (Exception $e) {
+
+				throw $e;
+			}
 		}
 
 		return $this->donorsNb;
