@@ -83,7 +83,7 @@ include('head.php');
 			</p>
 
 			<p>
-			'. _('Voici 12 d\'entre eux :') .'
+			'. _('On en pioche quelques uns au hasard :') .'
 			</p>
 			';
 
