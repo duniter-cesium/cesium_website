@@ -4,9 +4,9 @@ $pageTitle = _("Encouragez-nous !");
 $pageDescription = _("");
 
 include('cesiumDownloads.php');
-require_once('vendor/crowdfunding2/Crowdfunding.class.php');
-require_once('vendor/crowdfunding2/Chart.class.php');
-require_once('vendor/crowdfunding2/Graph.class.php');
+// require_once('vendor/crowdfunding2/Crowdfunding.class.php');
+// require_once('vendor/crowdfunding2/Chart.class.php');
+// require_once('vendor/crowdfunding2/Graph.class.php');
 
 
 include('head.php');
@@ -286,7 +286,7 @@ $(document).ready(function(){
 
 	$('.progress-bar').animate({
 
-		width: '<?php echo $currentCF->getPercentage(); ?>%'
+		width: '<?php //echo $currentCF->getPercentage(); ?>%'
 
 	}, 1300, '');
 });
