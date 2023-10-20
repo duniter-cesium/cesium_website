@@ -10,6 +10,8 @@ class Donor {
 	private $name;
 	
 	private $avatar;
+
+	private $hasAvatar = false;
 	
 	private $city;
 	
@@ -44,6 +46,18 @@ class Donor {
 		$this->avatar = new Avatar($content, $contentType);
 	}
 	
+	public function hasAvatar ($bool = null) {
+
+		if (isset($bool)) {
+
+			$this->hasAvatar = $bool;
+
+		} else {
+
+			return $this->hasAvatar;
+		}
+	}
+
 	public function getAvatar () {
 	
 		return $this->avatar;

@@ -4,9 +4,9 @@ $pageTitle = _("Encouragez-nous !");
 $pageDescription = _("");
 
 include('cesiumDownloads.php');
-// require_once('vendor/crowdfunding2/Crowdfunding.class.php');
-// require_once('vendor/crowdfunding2/Chart.class.php');
-// require_once('vendor/crowdfunding2/Graph.class.php');
+require_once('vendor/crowdfunding2/Crowdfunding.class.php');
+require_once('vendor/crowdfunding2/Chart.class.php');
+require_once('vendor/crowdfunding2/Graph.class.php');
 
 
 include('head.php');
@@ -26,79 +26,15 @@ include('head.php');
 	}
 	?>
 	
-	<h1><?php echo _("Merci aux donateurs !"); ?></h1>
-	
-	<p>Les développeurs remercient chaleureusement toutes les personnes qui, le mois dernier, ont financé en Ğ1 le projet Duniter&nbsp;:</p>
-	
-	<?php
-	
-	/*
-	$today = new DateTime();
-	
-	$lastMonthSameDay = (clone $today)->sub(new DateInterval('P1M'));
-	$lastMonthStart = new DateTime($lastMonthSameDay->format('Y-m-') . '01');
-	$lastMonthEnd = new DateTime((clone $lastMonthSameDay)->format('Y-m-t'));
-	
-	$lastMonthCF = new Crowdfunding(FUNDING_PUBKEY, 'relative', $lastMonthStart->format('Y-m-d'), $lastMonthEnd->format('Y-m-d'));
+	<h1><?php echo _("Encouragez-nous !"); ?></h1>
 
-	$donors = $lastMonthCF->getDonors();
-
-	if (empty($donors)) {
-
-		echo _('Pas encore de donateurs');
-
-	} else {
-		
-		echo '<ul class="donorsList">';
-
-		foreach ($donors as $donor) {
-			
-			$donorProfile = $lastMonthCF->getDonorCesiumPlusProfile($donor);
-			
-			echo '
-
-			<li>';
-				echo '
-				<a href="https://demo.cesium.app/#/app/wot/'. $donor .'/">';
-					
-					$avatar = $donorProfile->getAvatar();
-					
-					if (!empty($avatar)) {
-						
-						echo '<img src="data:'. $avatar->getContentType(). ';base64, '. $avatar->getContent() .'" />';
-					
-					} else {
-						
-						echo '<img src="'. DEFAULT_AVATAR .'" />';
-					}
-					
-					
-					echo '
-					<span class="name">
-						<span>
-							'. $donorProfile->getName() .'
-						</span>
-					</span>
-				</a>
-				
-			</li>';
-		}
-
-		echo '</ul>';
-	}
-	*/
-	?>
-
-	
-	<h2>Soutenir Duniter</h2>
-	
 	<p>
-		Si vous aussi vous souhaitez soutenir le projet Duniter, c'est simple&nbsp;: 
+		Si vous souhaitez soutenir le projet Duniter, c'est simple&nbsp;:
 	</p>
 
 	<div id="pubkey-and-copy-button">
 		<p class="pubkey">
-			Copiez la clef suivante dans votre presse-papier&nbsp;: 
+			Copiez la clef suivante dans votre presse-papier&nbsp;:
 
 			<input id="pubkey" type="text" value="<?php echo FUNDING_PUBKEY; ?>" />
 		</p>
@@ -114,14 +50,104 @@ include('head.php');
 			<p style="text-align: center;">Merci pour votre générosité ❤️</p>
 		</div>
 	</div>
+
+
+	<h2><?php echo _("Merci aux donateurs !"); ?></h2>
+
+	<?php
 	
+	$today = new DateTime();
 	
-	<!--
+	$lastMonthSameDay = (clone $today)->sub(new DateInterval('P1M'));
+	$lastMonthStart = new DateTime($lastMonthSameDay->format('Y-m-') . '01');
+	$lastMonthEnd = new DateTime((clone $lastMonthSameDay)->format('Y-m-t'));
+	
+	$lastMonthCF = new Crowdfunding(FUNDING_PUBKEY, 'relative', $lastMonthStart->format('Y-m-d'), $lastMonthEnd->format('Y-m-d'));
+
+	try {
+
+		$donors = $lastMonthCF->getDonors();
+
+		if (empty($donors)) {
+
+			echo '
+				<p>
+					' . _('Pas encore de donateurs') . '
+				</p>';
+
+		} else {
+
+			echo '
+			<p>
+				'. _('Les développeurs remercient chaleureusement toutes les personnes qui, le mois dernier, ont financé en Ğ1 le projet Duniter&nbsp;:') .'
+			</p>
+			';
+
+			echo '<ul class="donorsList">';
+
+			foreach ($donors as $donorPk) {
+
+				$donorProfile = $lastMonthCF->getDonorCesiumPlusProfile($donorPk);
+
+				if (!$donorProfile->hasAvatar()) {
+
+					continue;
+				}
+
+				echo '
+
+				<li>';
+					echo '
+					<a href="https://demo.cesium.app/#/app/wot/'. $donorPk .'/">';
+
+
+						echo '<img src="'. CESIUM_PLUS_NODE . '/user/profile/'. $donorPk .'/_image/avatar.png" />';
+
+						/*
+						$avatar = $donorProfile->getAvatar();
+
+						if (!empty($avatar)) {
+
+							echo '<img src="data:'. $avatar->getContentType(). ';base64, '. $avatar->getContent() .'" />';
+
+						} else {
+
+							echo '<img src="'. DEFAULT_AVATAR .'" />';
+						}
+						*/
+
+
+						echo '
+						<span class="name">
+							<span>
+								'. $donorProfile->getName() .'
+							</span>
+						</span>
+					</a>
+
+				</li>';
+			}
+
+			echo '</ul>';
+		}
+
+	} catch (Exception $e) {
+
+		echo '
+			<p>
+				' . _("Nous n'avons pas réussi à récupérer la liste des donateurs.") . '
+			</p>
+			<p>
+				<a href="https://demo.cesium.app/#/app/wot/tx/'. FUNDING_PUBKEY .'/">
+					'. _('Voir les dons dans Cesium') .'
+				</a>
+			</p>';
+	}
+	?>
+	
 	<h2>Progression du crowdfunding du mois en cours</h2>
 	
 	<figure id="chart"></figure>
-	-->
-	
 	
 	
 	
@@ -236,21 +262,19 @@ include('head.php');
 		</p>
 		
 		<p>
-			Ce mois-ci, nous aimerions donc atteindre la somme de <?php echo FUNDING_TARGET; ?> DU<sub>Ğ1</sub>. 
+			Ce mois-ci, nous aimerions donc atteindre la somme de <?php // echo FUNDING_TARGET; ?> DU<sub>Ğ1</sub>.
 			Voilà où nous en sommes par rapport à cet objectif&nbsp;:
 		</p>
-		
+		-->
 		
 
 	
 	</section>
 	
-	-->
 </article>
 
 <?php 
 
-/*
 $currentCF = new Crowdfunding(FUNDING_PUBKEY, 'relative');
 $currentCF->setTarget(FUNDING_TARGET);
 $chart = new Chart($currentCF);
@@ -275,12 +299,11 @@ $chart->addGraph($amountCumulativeGraph);
 
 
 echo $chart->getScripts(LANG, '#chart', $rootURL . '/vendor/crowdfunding2/');
-*/
 
 ?>
 
-<script src="<?php echo $rootURL; ?>/lib/js/jquery-3.4.1.min.js"></script>
-<script src="<?php echo $rootURL; ?>/lib/js/counter.js"></script>
+<script src="<?php echo $rootURL; ?>/lib/jquery-3.4.1.min.js"></script>
+<script src="<?php echo $rootURL; ?>/lib/counter.js"></script>
 <script>
 $(document).ready(function(){	
 

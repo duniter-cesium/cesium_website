@@ -1227,11 +1227,12 @@ class Crowdfunding {
 				]
 			],
 			'_source' => [
-				'city',
+				// 'city',
 				'title',
 				'issuer',
-				'avatar',
-				'geoPoint'
+				'avatar._content_type',
+				// 'avatar',
+				// 'geoPoint'
 			]
 		];
 
@@ -1268,7 +1269,11 @@ class Crowdfunding {
 
 			if (isset($profile->avatar)) {
 
-				$donor->setAvatar($profile->avatar->_content, $profile->avatar->_content_type);
+				if (!empty($profile->avatar->_content_type)) {
+
+					$donor->hasAvatar(true);
+				}
+				// $donor->setAvatar($profile->avatar->_content, $profile->avatar->_content_type);
 			}
 
 			if (isset($profile->geoPoint)) {
@@ -1578,7 +1583,7 @@ class Crowdfunding {
 		if (empty($json)) {
 
 			$out = [];
-			$out[] = _('Aucun noeud Duniter n\'a été trouvé.');
+			$out[] = _('La récupération des données a échoué.');
 			$out[] = _('Noeud interrogés : ');
 
 			if ($cesiumPlus) {
