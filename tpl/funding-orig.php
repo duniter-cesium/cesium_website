@@ -302,19 +302,6 @@ echo $chart->getScripts(LANG, '#chart', $rootURL . '/vendor/crowdfunding2/');
 
 ?>
 
-<script src="<?php echo $rootURL; ?>/lib/jquery-3.4.1.min.js"></script>
-<script src="<?php echo $rootURL; ?>/lib/counter.js"></script>
-<script>
-$(document).ready(function(){	
-
-	$('.progress-bar').animate({
-
-		width: '<?php //echo $currentCF->getPercentage(); ?>%'
-
-	}, 1300, '');
-});
-</script>
-
 <script>
 function copy() {
 	
