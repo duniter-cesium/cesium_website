@@ -1585,6 +1585,7 @@ class Crowdfunding {
 			$out = [];
 			$out[] = _('La récupération des données a échoué.');
 			$out[] = _('Noeud interrogés : ');
+			$out = array_merge($out, $nodes);
 
 			if ($cesiumPlus) {
 
@@ -1592,9 +1593,7 @@ class Crowdfunding {
 				$out[] = print_r($queryParams, true);
 			}
 
-			$out = array_merge($out, $nodes);
-
-			$this->decease($out);
+			throw new Exception(implode("\n", $out));
 		}
 
 		return $json;
