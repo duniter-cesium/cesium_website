@@ -54,6 +54,7 @@ Go to `/etc/nginx/sites-available/`.
 
 Edit the `default` file to add the bloc that follows `# Configuration for /cesium_website`.
 
+The `/var/www/localhost` part is assuming this is where is stored `cesium_website` (`localhost` would probably be a symbolic link).
 
 ```txt
 server {

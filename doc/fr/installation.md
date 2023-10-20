@@ -112,7 +112,7 @@ Redémarrez nginx :
 sudo service nginx restart
 ```
 
-#### option 1 : créer un fichier de configuration dédié
+#### option 2 : créer un fichier de configuration dédié
 
 Vous pouvez aussi créer un nouveau fichier de configuration, et un nouveau nom de serveur local.
 
@@ -138,7 +138,7 @@ sudo nano /etc/nginx/sites-available/cesium_website
 ```
 
 et ajoutez-y le contenu idoine :
-```
+```txt
 server {
 
 	listen 80;
