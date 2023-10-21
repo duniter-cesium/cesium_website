@@ -17,7 +17,7 @@ $bodyIds = !isset($bodyIds) ? '' : $bodyIds;
 		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
 
 		<title><?php echo $pageTitle; ?></title>
-		<link type="image/x-icon" rel="shortcut icon" href="<?php echo $rootURL; ?>/img/favicon.png" />
+		<link rel="shortcut icon" type="image/png" href="<?php echo $rootURL; ?>/img/logo.small.cs.dune.200x200.png" />
 		<meta name="generator" content="BorisPaing" />
 
 
