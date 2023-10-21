@@ -5,6 +5,8 @@
 	--bp4: 1200px;
 	--screenshot-ratio: 1.62091503;
 	--screenshot-laptop-keyboard-ratio: 0.90151515;
+	--header-height: 5.625rem;
+	/* 90px/16px/rem */
 }
 @font-face {
 	font-family: 'FontAwesome';
@@ -338,7 +340,7 @@ nav#langSelector ul li a:visited {
 body > header:first-child {
 	background: #311873;
 	overflow: hidden;
-	height: 120px;
+	height: var(--header-height);
 	padding: 0.5rem 1rem;
 	box-sizing: content-box;
 	display: flex;
@@ -364,21 +366,15 @@ body > header:first-child p img {
 		margin-left: 0;
 	}
 }
-body > header:first-child > :nt-child(2) {
+body > header:first-child > .site-logo {
 	order: 1;
 }
-body > header:first-child > h1,
-body > header:first-child > h2 {
+body > header:first-child > .site-title {
 	order: 2;
 	flex-grow: 1;
 	text-align: left;
-	font-size: 2.25rem;
-}
-@media (max-width: 575px) {
-	body > header:first-child > h1,
-	body > header:first-child > h2 {
-		font-size: 2rem;
-	}
+	font-size: 2rem;
+	margin-left: 4px;
 }
 body > header:first-child nav {
 	order: 3;
@@ -428,7 +424,7 @@ body > header:first-child nav ul li a:hover {
 	body > header:first-child nav ul {
 		overflow: hidden;
 		position: absolute;
-		top: 120px;
+		top: var(--header-height);
 		right: 0;
 		width: 100vw;
 		background-color: hsl(256, 65.5%, 27.3%);
@@ -586,7 +582,7 @@ body#home #showcase *:not(.CTA-button) > a:hover {
 	body#home #showcase div figure img {
 		position: absolute;
 		align-self: center;
-		/*max-height: calc(~"90vh - 120px");*/
+		/*max-height: calc(~"90vh - var(--header-height)");*/
 		height: 100%;
 	}
 	body#home #showcase div aside * {

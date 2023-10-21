@@ -105,16 +105,16 @@ $bodyIds = !isset($bodyIds) ? '' : $bodyIds;
 				$element = $pageIsHome ? 'h1' : 'h2';
 
 				echo '
-				<'. $element .'>
+				<'. $element .' class="site-title">
 					<a href="'. parseURI("/") .'">
 						Cesium Ğ1
 					</a>
 				</'. $element .'>';
 				?>
 
-				<p>
+				<p class="site-logo">
 					<a href="<?php echo parseURI("/"); ?>">
-						<img src="<?php echo $rootURL; ?>/lib/logo-cesium.svg" alt="logo Cesium Ğ1" />
+						<img src="<?php echo $rootURL; ?>/lib/logo.small.cs.dune.svg" alt="logo Cesium Ğ1" />
 					</a>
 				</p>
 

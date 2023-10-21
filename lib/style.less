@@ -6,7 +6,7 @@
 	--bp4: 1200px;
 	--screenshot-ratio: 1.620915033;
 	--screenshot-laptop-keyboard-ratio: 0.901515152;
-	
+	--header-height: 5.625rem; /* 90px/16px/rem */
 
 	@font-face
 	{
@@ -497,7 +497,7 @@ body > header:first-child  {
 	
 	background: #311873;
 	overflow: hidden;
-	height: 120px;
+	height: var(--header-height);
 	padding: 0.5rem 1rem;
 	box-sizing: content-box;
 	display: flex;
@@ -527,26 +527,21 @@ body > header:first-child  {
 		}
 	}
 
-	> :nt-child(2)
+
+	/* ==== HEADER : titre et logo ==== */
+
+	> .site-logo
 	{
 		order: 1;
 	}
 
-	/* ==== HEADER : titre et logo ==== */ 
-
-	> h1, 
-	> h2
+	> .site-title
 	{
 		order: 2;
 		flex-grow: 1;
 		text-align: left;
-		font-size: 2.25rem;
-
-
-		@media (max-width: 575px) {
-
-			font-size: 2rem;
-		}
+		font-size: 2rem;
+		margin-left: 4px;
 	}
 	
 	/* ==== HEADER : menu ==== */ 
@@ -632,7 +627,7 @@ body > header:first-child  {
 			{
 				overflow: hidden;
 				position: absolute;
-				top: 120px;
+				top: var(--header-height);
 				right: 0;
 				width: 100vw;
 				background-color: hsl(256, 65.5%, 27.3%);
@@ -869,7 +864,7 @@ body#home
 					{
 						position: absolute;
 						align-self: center;
-						/*max-height: calc(~"90vh - 120px");*/
+						/*max-height: calc(~"90vh - var(--header-height)");*/
 						height: 100%;
 					}
 
