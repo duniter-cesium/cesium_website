@@ -68,14 +68,6 @@ include('head.php');
 				'img' => _('/recevoir.png')
 			],
 			[
-				'name' => _('Trouvez des membres près de chez vous'), 
-				'desc' => [
-				           _("Consultez la carte des membres afin de trouver les membres les plus proches de chez vous."), 
-				           _("Vous pouvez les contacter pour faire vos premiers échanges ou demander des certifications."), 
-				          ], 
-				'img' => $mapFileName
-			], 
-			[
 				'name' => _('Recherche par nom'), 
 				'desc' => [
 				           _("Trouvez des membres de la Ğ1 d'après leur nom, prénom ou identifiant dans la blockchain.")
@@ -128,6 +120,16 @@ include('head.php');
 				          ], 
 				'img' => _('/suivre-d-autres-portefeuilles.png')
 			], 
+			/*
+			[
+				'name' => _('Trouvez des membres près de chez vous'),
+				'desc' => [
+				           _("Consultez la carte des membres afin de trouver les membres les plus proches de chez vous."),
+				           _("Vous pouvez les contacter pour faire vos premiers échanges ou demander des certifications."),
+				          ],
+				'img' => $mapFileName
+			],
+			*/
 		);
 	
 	foreach ($features as $f)
