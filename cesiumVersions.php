@@ -1,10 +1,10 @@
 <?php
 
 $cesiumVersions = [
-	   'home' => '1.7.6',
-	'android' => '1.7.6',
-	 'debian' => '1.7.6',
+	   'home' => '1.7.13',
+	'android' => '1.7.13',
+	 'debian' => '1.7.13',
  	   'arch' => '1.6.1', 
-	'windows' => '1.7.6',
-	    'web' => '1.7.6'
+	'windows' => '1.7.13',
+	    'web' => '1.7.13'
 ];
