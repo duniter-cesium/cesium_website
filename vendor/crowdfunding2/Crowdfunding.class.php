@@ -73,36 +73,25 @@ class Crowdfunding {
 
 	private $nodes = [
 
-		// Fast ones
-		'duniter.g1.1000i100.fr',
-		'duniter-g1.p2p.legal',
-		'duniter.normandie-libre.fr',
-		'g1.mithril.re',
-		'g1.presles.fr',
-		'duniter.vincentux.fr',
-		'g1.le-sou.org',
-		'g1.donnadieu.fr',
-
-		/*
-		// Node that timeout
-		'g1.duniter.org',
-		'g1.librelois.fr',
+		// https://ginspecte.mithril.re/service_types/1
+		'duniter971.dns1.us',
+		'duniter.g1.pfouque.xyz',
+		'duniter.pini.fr',
+		'g1.asycn.io',
+		'g1.brussels.ovh',
 		'g1.cgeek.fr',
-		'remuniter.cgeek.fr',
-		'g1.monnaielibreoccitanie.org',
-
-		// Nodes with other issues
-		'g1.duniter.inso.ovh',
-		*/
+		'g1.computhings.be'
 	];
 
 	private $cesiumPlusNodes = [
 
+		// https://ginspecte.mithril.re/service_types/2
+		'g1.data.brussels.ovh',
+		'g1.data.cuates.net',
 		'g1.data.e-is.pro',
-		'g1.data.presles.fr',
-		'g1.data.adn.life',
-		'g1.data.duniter.fr',
-		'g1.data.le-sou.org'
+		'g1.data.le-sou.org',
+		'g1.data.mithril.re',
+		'g1.data.pini.fr'
 	];
 
 	private $preferredNode = NULL;
@@ -187,6 +176,7 @@ class Crowdfunding {
 	private $donorsList = NULL;
 
 	private $donorsProfiles = NULL;
+	private $donorsCesiumPlusProfiles = NULL;
 
 
 	private $meanDonation = NULL;
@@ -921,8 +911,14 @@ class Crowdfunding {
 
 		if (!isset($this->amountCollected)) {
 
-			$this->fetchDonationsList();
+			try {
 
+				$this->fetchDonationsList();
+
+			} catch (Exception $e) {
+
+				throw $e;
+			}
 		}
 
 		return $this->convertIntoChosenUnit($this->amountCollected);
@@ -932,7 +928,14 @@ class Crowdfunding {
 
 		if (!isset($this->donorsNb)) {
 
-			$this->fetchDonationsList();
+			try {
+
+				$this->fetchDonationsList();
+
+			} catch (Exception $e) {
+
+				throw $e;
+			}
 		}
 
 		return $this->donorsNb;
@@ -1067,67 +1070,81 @@ class Crowdfunding {
 		return $this->monthlyAmountCollectedMean;
 	}
 
+	private function cacheIt ($json, $cacheFileFullPath) {
+
+		if (!$this->isActivatedCache) {
+
+			return false;
+		}
+
+		// Cache tx
+
+		$cacheDir = substr($cacheFileFullPath, 0, strrpos($cacheFileFullPath, '/'));
+
+		if (!file_exists($cacheDir)) {
+
+			mkdir($cacheDir, 0777, true);
+
+		}
+
+		file_put_contents($cacheFileFullPath, $json);
+	}
+
+	private function getFromCache ($cacheFullPath) {
+
+		$json = NULL;
+
+		if (!$this->isActivatedCache) {
+
+			return $json;
+		}
+
+		if (file_exists($cacheFullPath) and ((time() - filemtime($cacheFullPath)) < $this->cacheLongevity)) {
+
+			$json = file_get_contents($cacheFullPath);
+		}
+
+		return $json;
+	}
+
 	private function getTransactions ($pubkey, $startDate, $endDate = NULL) {
 
 		if ($startDate > $this->now) {
 
 			return array();
 
+		}
+
+		if (!isset($endDate)) {
+
+			$endDate = $this->today;
+		}
+
+		$txFullPath =
+			$this->isOver() ?
+				$this->cacheDir . 'tx/' . $pubkey . '_'  . $startDate->format('Y-m-d') . '_' . $endDate->format('Y-m-d') . '.json'
+			:
+				$this->cacheDir . 'tx/' . $pubkey . '_'  . $startDate->format('Y-m-d') . '.json'
+		;
+
+		$json = $this->getFromCache($txFullPath);
+
+		if (empty($json)) {
+
+			$jsonUri = '/tx/history/' . $pubkey . "/times/" . $startDate->getTimestamp() . "/" . $endDate->getTimestamp();
+			$json = $this->fetchJson($jsonUri);
+		}
+
+		$transactions = json_decode($json);
+
+		if (empty($transactions)) {
+
+			throw new Exception(_("Nous n'avons pas pu récupérer la liste des transactions."));
+			return array();
+
 		} else {
 
-			if (!isset($endDate)) {
-
-				$endDate = $this->today;
-			}
-
-			$json = NULL;
-			$jsonUri = '/tx/history/' . $pubkey . "/times/" . $startDate->getTimestamp() . "/" . $endDate->getTimestamp();
-			$txCacheDir = $this->cacheDir . 'tx/';
-
-			if ($this->isOver()) {
-
-				$txFullPath = $txCacheDir . $pubkey . '_'  . $startDate->format('Y-m-d') . '_' . $endDate->format('Y-m-d') . '.json';
-
-			} else {
-
-				$txFullPath = $txCacheDir . $pubkey . '_'  . $startDate->format('Y-m-d') . '.json';
-
-			}
-
-			if ($this->isActivatedCache) {
-
-				if (file_exists($txFullPath) and ((time() - filemtime($txFullPath)) < $this->cacheLongevity)) {
-
-					$json = file_get_contents($txFullPath);
-				}
-
-
-				if (empty($json)) {
-
-					$json = $this->fetchJson($jsonUri);
-
-					// Cache tx
-
-					if ($this->isActivatedCache) {
-
-						if (!file_exists($txCacheDir)) {
-
-							mkdir($txCacheDir, 0777, true);
-
-						}
-
-						file_put_contents($txFullPath, $json);
-					}
-
-				}
-
-			} else {
-
-				$json = $this->fetchJson($jsonUri);
-			}
-
-			$transactions = json_decode($json);
-
+			$this->cacheIt($json, $txFullPath);
 			return $transactions->history->received;
 		}
 	}
@@ -1142,7 +1159,14 @@ class Crowdfunding {
 
 		if (empty($this->donationsList)) {
 
-			$this->fetchDonationsList();
+			try {
+
+				$this->fetchDonationsList();
+
+			} catch (Exception $e) {
+
+				throw $e;
+			}
 
 		}
 
@@ -1152,9 +1176,16 @@ class Crowdfunding {
 
 	public function getDonors () {
 
-		if (empty($this->donorsList)) {
+		try {
 
-			$this->fetchDonationsList();
+			if (empty($this->donorsList)) {
+
+				$this->fetchDonationsList();
+			}
+
+		} catch (Exception $e) {
+
+			throw $e;
 		}
 
 		return $this->donorsList;
@@ -1177,6 +1208,16 @@ class Crowdfunding {
 		}
 	}
 
+	public function getDonorsCesiumPlusProfiles () {
+
+		if ($this->donorsCesiumPlusProfiles === NULL) {
+
+			$this->fetchCesiumPlusProfiles();
+		}
+
+		return $this->donorsCesiumPlusProfiles;
+	}
+
 	public function fetchCesiumPlusProfiles () {
 
 		$this->donorsCesiumPlusProfiles = array();
@@ -1189,11 +1230,12 @@ class Crowdfunding {
 				]
 			],
 			'_source' => [
-				'city',
+				// 'city',
 				'title',
 				'issuer',
-				'avatar',
-				'geoPoint'
+				'avatar._content_type',
+				// 'avatar',
+				// 'geoPoint'
 			]
 		];
 
@@ -1230,7 +1272,11 @@ class Crowdfunding {
 
 			if (isset($profile->avatar)) {
 
-				$donor->setAvatar($profile->avatar->_content, $profile->avatar->_content_type);
+				if (!empty($profile->avatar->_content_type)) {
+
+					$donor->hasAvatar(true);
+				}
+				// $donor->setAvatar($profile->avatar->_content, $profile->avatar->_content_type);
 			}
 
 			if (isset($profile->geoPoint)) {
@@ -1289,48 +1335,59 @@ class Crowdfunding {
 		$this->amountCollected = 0;
 		$this->donorsNb = 0;
 
-		$tx = $this->getTransactions($this->pubkey,
-		                             $this->startDate,
-		                             $this->endDate
-		                            );
+		try {
+
+			$tx =
+				$this->getTransactions(
+					$this->pubkey,
+					$this->startDate,
+					$this->endDate
+				);
+
+		} catch (Exception $e) {
+
+			throw $e;
+		}
 
 		foreach ($tx as $t) {
 
-			// Filter only incoming transactions
-			if ($t->issuers[0] != $this->pubkey) {
+			// Do not take outgoing transactions into account
+			if ($t->issuers[0] == $this->pubkey) {
 
-				$donorPubkey = $t->issuers[0];
+				continue;
+			}
 
-				foreach ($t->outputs as $o) {
+			$donorPubkey = $t->issuers[0];
 
-					if (strstr($o, $this->pubkey)) {
+			foreach ($t->outputs as $o) {
 
-						$o = explode(':', $o);
+				if (strstr($o, $this->pubkey)) {
 
-						$transactionAmount = $o[0] / 100;
+					$o = explode(':', $o);
 
-						$this->donationsList[] = new Donation(
+					$transactionAmount = $o[0] / 100;
 
-							$transactionAmount,
-							$donorPubkey,
-							intval($t->time),
-							$t->comment
-						);
+					$this->donationsList[] = new Donation(
 
-						$this->amountCollected += $transactionAmount;
+						$transactionAmount,
+						$donorPubkey,
+						intval($t->time),
+						$t->comment
+					);
 
-						if (!in_array($donorPubkey, $this->donorsList)) {
+					$this->amountCollected += $transactionAmount;
 
-							++$this->donorsNb;
+					if (!in_array($donorPubkey, $this->donorsList)) {
 
-							$this->donorsList[] = $donorPubkey;
+						++$this->donorsNb;
 
-							$this->totalDonationPerDonor[$donorPubkey] = $transactionAmount;
+						$this->donorsList[] = $donorPubkey;
 
-						} else {
+						$this->totalDonationPerDonor[$donorPubkey] = $transactionAmount;
 
-							$this->totalDonationPerDonor[$donorPubkey] += $transactionAmount;
-						}
+					} else {
+
+						$this->totalDonationPerDonor[$donorPubkey] += $transactionAmount;
 					}
 				}
 			}
@@ -1361,11 +1418,11 @@ class Crowdfunding {
 		$node = htmlspecialchars($node);
 
 		$this->nodes = array_unique(
-		                            array_merge(
-		                                        (array)$node,
-		                                        $this->nodes
-		                                       )
-		                           );
+			array_merge(
+				(array)$node,
+				$this->nodes
+			)
+		);
 	}
 
 
@@ -1477,10 +1534,11 @@ class Crowdfunding {
 
 		do {
 
-
-			$json = @file_get_contents("https://" . current($nodes) . $uri,
-				                   false,
-				                   $streamContext);
+			$json = @file_get_contents(
+				"https://" . current($nodes) . $uri,
+				false,
+				$streamContext
+			);
 
 			if (empty($json)) {
 
@@ -1528,8 +1586,9 @@ class Crowdfunding {
 		if (empty($json)) {
 
 			$out = [];
-			$out[] = _('Aucun noeud Duniter n\'a été trouvé.');
+			$out[] = _('La récupération des données a échoué.');
 			$out[] = _('Noeud interrogés : ');
+			$out = array_merge($out, $nodes);
 
 			if ($cesiumPlus) {
 
@@ -1537,9 +1596,7 @@ class Crowdfunding {
 				$out[] = print_r($queryParams, true);
 			}
 
-			$out = array_merge($out, $nodes);
-
-			$this->decease($out);
+			throw new Exception(implode("\n", $out));
 		}
 
 		return $json;

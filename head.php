@@ -17,7 +17,7 @@ $bodyIds = !isset($bodyIds) ? '' : $bodyIds;
 		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
 
 		<title><?php echo $pageTitle; ?></title>
-		<link type="image/x-icon" rel="shortcut icon" href="<?php echo $rootURL; ?>/img/favicon.png" />
+		<link rel="shortcut icon" type="image/png" href="<?php echo $rootURL; ?>/img/logo.small.cs.dune.200x200.png" />
 		<meta name="generator" content="BorisPaing" />
 
 
@@ -105,16 +105,16 @@ $bodyIds = !isset($bodyIds) ? '' : $bodyIds;
 				$element = $pageIsHome ? 'h1' : 'h2';
 
 				echo '
-				<'. $element .'>
+				<'. $element .' class="site-title">
 					<a href="'. parseURI("/") .'">
 						Cesium Ğ1
 					</a>
 				</'. $element .'>';
 				?>
 
-				<p>
+				<p class="site-logo">
 					<a href="<?php echo parseURI("/"); ?>">
-						<img src="<?php echo $rootURL; ?>/lib/logo-cesium.svg" alt="logo Cesium Ğ1" />
+						<img src="<?php echo $rootURL; ?>/lib/logo.small.cs.dune.svg" alt="logo Cesium Ğ1" />
 					</a>
 				</p>
 
